@@ -2,8 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css'; // Global styles
 
 export const metadata: Metadata = {
-  title: 'My Google AI Studio App',
-  description: 'My Google AI Studio App',
+  title: 'LSPD Warrant System',
+  description: 'Système de gestion de mandats et réquisitions pour la LSPD et le DOJ',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {

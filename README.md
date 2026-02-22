@@ -1,20 +1,27 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# LSPD Warrant System
 
-# Run and deploy your AI Studio app
+Système de gestion de mandats et réquisitions pour la LSPD et le DOJ, avec authentification Discord et génération de PDF.
 
-This contains everything you need to run your app locally.
+## Fonctionnalités
 
-View your app in AI Studio: https://ai.studio/apps/98d78a33-6185-4c38-be7d-913cfef60737
+- Création de mandats (perquisition, arrestation, réquisition)
+- Approbation/rejet par les juges du DOJ
+- Génération de PDF pour les mandats approuvés
+- Authentification Discord OAuth avec contrôle d'accès par rôles
 
-## Run Locally
+## Lancer en local
 
-**Prerequisites:**  Node.js
+**Prérequis :** Node.js
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. Installer les dépendances :
+   ```bash
+   npm install
+   ```
+2. Copier `.env.example` en `.env.local` et remplir les variables :
+   ```bash
+   cp .env.example .env.local
+   ```
+3. Lancer l'application :
+   ```bash
+   npm run dev
+   ```
