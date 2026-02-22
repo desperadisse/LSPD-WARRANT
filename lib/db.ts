@@ -27,6 +27,7 @@ export interface Warrant {
   judgeId?: string;
   judgeName?: string;
   rejectionReason?: string;
+  pdfToken?: string;
 }
 
 interface DatabaseSchema {

@@ -11,8 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { generateWarrantPDF } from '@/lib/pdf';
-import { Loader2, Download, Check, X } from 'lucide-react';
+import { Loader2, Download, Check, X, Link, Copy } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
@@ -28,6 +27,7 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
   const [isLoading, setIsLoading] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const isDOJ = user.roles.includes('doj');
 
@@ -136,11 +136,32 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
 
         <DialogFooter className="flex justify-between sm:justify-between">
           <div className="flex gap-2">
-            {warrant.status === 'approved' && (
-              <Button variant="outline" onClick={() => generateWarrantPDF(warrant)} className="border-[#141414]/20">
-                <Download className="w-4 h-4 mr-2" />
-                PDF
-              </Button>
+            {warrant.status === 'approved' && warrant.pdfToken && (
+              <>
+                <Button
+                  variant="outline"
+                  className="border-[#141414]/20"
+                  onClick={() => {
+                    window.open(`/api/warrants/${warrant.id}/pdf?token=${warrant.pdfToken}`, '_blank');
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-[#141414]/20"
+                  onClick={() => {
+                    const url = `${window.location.origin}/api/warrants/${warrant.id}/pdf?token=${warrant.pdfToken}`;
+                    navigator.clipboard.writeText(url);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                >
+                  {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copied ? 'Copié !' : 'Copier le lien'}
+                </Button>
+              </>
             )}
           </div>
 

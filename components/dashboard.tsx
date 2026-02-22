@@ -59,7 +59,7 @@ export function Dashboard({ user }: DashboardProps) {
           <div>
             <h1 className="font-bold text-lg tracking-tight">WARRANT SYSTEM</h1>
             <div className="text-xs opacity-60 font-mono uppercase tracking-wider">
-              {user.username} | {isDOJ ? 'DOJ ACCESS' : 'POLICE ACCESS'}
+              {user.username} | {[isPolice && 'POLICE', isDOJ && 'DOJ'].filter(Boolean).join(' | ')} ACCESS
             </div>
           </div>
         </div>
@@ -68,9 +68,8 @@ export function Dashboard({ user }: DashboardProps) {
             variant="ghost" 
             size="sm" 
             className="text-[#E4E3E0] hover:bg-white/10"
-            onClick={() => {
-              // Clear cookie and reload
-              document.cookie = 'session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            onClick={async () => {
+              await fetch('/api/auth/logout', { method: 'POST' });
               window.location.reload();
             }}
           >

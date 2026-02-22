@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import { Warrant } from '@/lib/db';
 
-export function generateWarrantPDF(warrant: Warrant) {
+export function generateWarrantPDFBuffer(warrant: Warrant): ArrayBuffer {
   const doc = new jsPDF();
   
   // Set font
@@ -95,5 +95,5 @@ export function generateWarrantPDF(warrant: Warrant) {
     doc.text('EN ATTENTE DE VALIDATION', 20, footerY + 20);
   }
 
-  doc.save(`mandat-${warrant.id.slice(0, 8)}.pdf`);
+  return doc.output('arraybuffer');
 }

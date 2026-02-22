@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getWarrantById, saveWarrant, Warrant } from '@/lib/db';
 import { getSession } from '@/lib/auth';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -44,6 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       warrant.judgeId = session.id as string;
       warrant.judgeName = `${session.username}#${session.discriminator}`;
       warrant.updatedAt = new Date().toISOString();
+      warrant.pdfToken = uuidv4();
     } else if (status === 'rejected') {
       warrant.status = 'rejected';
       warrant.judgeId = session.id as string;
