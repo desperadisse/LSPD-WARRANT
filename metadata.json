@@ -1,0 +1,5 @@
+{
+  "name": "LSPD Warrant System",
+  "description": "Système de gestion de mandats et réquisitions pour la LSPD et le DOJ, avec authentification Discord et génération de PDF.",
+  "requestFramePermissions": []
+}
