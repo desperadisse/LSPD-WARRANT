@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getWarrants, saveWarrant, Warrant } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
+import { notifyDojNewWarrant } from '@/lib/discord';
 
 export async function GET(request: NextRequest) {
   const session = await getSession();
@@ -55,6 +56,9 @@ export async function POST(request: NextRequest) {
     };
 
     saveWarrant(newWarrant);
+
+    notifyDojNewWarrant(newWarrant).catch(console.error);
+
     return NextResponse.json(newWarrant);
   } catch (error) {
     console.error('Error creating warrant:', error);
