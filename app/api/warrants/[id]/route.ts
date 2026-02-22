@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWarrantById, saveWarrant, deleteWarrant, Warrant } from '@/lib/db';
+import { getWarrantById, saveWarrant, deleteWarrant } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
+import { notifyOfficerWarrantDecision } from '@/lib/discord';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -62,6 +63,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     saveWarrant(warrant);
+
+    notifyOfficerWarrantDecision({
+      type: warrant.type,
+      targetName: warrant.targetName,
+      officerId: warrant.officerId,
+      status: warrant.status as 'approved' | 'rejected' | 'cancelled',
+      judgeName: warrant.judgeName!,
+      rejectionReason: warrant.rejectionReason,
+      id: warrant.id,
+      pdfToken: warrant.pdfToken,
+    }).catch(() => {});
+
     return NextResponse.json(warrant);
   } catch (error) {
     console.error('Error updating warrant:', error);

@@ -70,6 +70,59 @@ function getWarrantTypeName(type: string): string {
   return 'Réquisition Judiciaire';
 }
 
+export async function notifyOfficerWarrantDecision(warrant: {
+  type: string;
+  targetName: string;
+  officerId: string;
+  status: 'approved' | 'rejected' | 'cancelled';
+  judgeName: string;
+  rejectionReason?: string;
+  id: string;
+  pdfToken?: string;
+}): Promise<void> {
+  if (!BOT_TOKEN) {
+    console.warn('DISCORD_BOT_TOKEN not set, skipping officer notification');
+    return;
+  }
+
+  try {
+    const appUrl = process.env.APP_URL || '';
+    const typeName = getWarrantTypeName(warrant.type);
+    let message = '';
+
+    if (warrant.status === 'approved') {
+      const pdfLink = `${appUrl}/api/warrants/${warrant.id}/pdf?token=${warrant.pdfToken}`;
+      message =
+        `✅ **Dossier approuvé**\n\n` +
+        `**Type :** ${typeName}\n` +
+        `**Cible :** ${warrant.targetName}\n` +
+        `**Juge :** ${warrant.judgeName}\n\n` +
+        `📄 Document officiel : ${pdfLink}`;
+    } else if (warrant.status === 'rejected') {
+      message =
+        `❌ **Dossier refusé**\n\n` +
+        `**Type :** ${typeName}\n` +
+        `**Cible :** ${warrant.targetName}\n` +
+        `**Juge :** ${warrant.judgeName}\n` +
+        (warrant.rejectionReason ? `**Motif du refus :** ${warrant.rejectionReason}\n` : '') +
+        `\n👉 Consultez le dossier : ${appUrl}`;
+    } else if (warrant.status === 'cancelled') {
+      message =
+        `🚫 **Dossier annulé**\n\n` +
+        `**Type :** ${typeName}\n` +
+        `**Cible :** ${warrant.targetName}\n` +
+        `**Par :** ${warrant.judgeName}\n\n` +
+        `👉 Consultez le dossier : ${appUrl}`;
+    }
+
+    if (message) {
+      await sendDm(warrant.officerId, message);
+    }
+  } catch (error) {
+    console.error('Error notifying officer:', error);
+  }
+}
+
 export async function notifyDojNewWarrant(warrant: {
   type: string;
   targetName: string;
