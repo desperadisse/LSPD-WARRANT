@@ -3,12 +3,23 @@ services:
     build: .
     container_name: lspd-warrant
     restart: unless-stopped
-    ports:
-      - "80:3000"
+    expose:
+      - "3000"
     env_file:
       - .env.local
     volumes:
       - warrant-data:/app/data
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/etc/caddy/certs:ro
 
 volumes:
   warrant-data:
