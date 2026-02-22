@@ -3,6 +3,7 @@ import { getWarrants, saveWarrant, Warrant } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { notifyDojNewWarrant } from '@/lib/discord';
+import { fetchCriminalRecord } from '@/lib/mdt';
 
 export async function GET(request: NextRequest) {
   const session = await getSession();
@@ -35,10 +36,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { type, targetName, reason, details, location } = body;
+    const { type, targetName, reason, details, location, criminalRecordUrl } = body;
 
     if (!type || !targetName || !reason || !details) {
       return new NextResponse('Missing required fields', { status: 400 });
+    }
+
+    let criminalRecord = undefined;
+    if (criminalRecordUrl && typeof criminalRecordUrl === 'string' && criminalRecordUrl.includes('mdt.sincity-rp.fr')) {
+      criminalRecord = await fetchCriminalRecord(criminalRecordUrl) || undefined;
     }
 
     const newWarrant: Warrant = {
@@ -53,6 +59,8 @@ export async function POST(request: NextRequest) {
       reason,
       details,
       location,
+      criminalRecordUrl: criminalRecordUrl || undefined,
+      criminalRecord,
     };
 
     saveWarrant(newWarrant);

@@ -33,6 +33,12 @@ export interface Warrant {
   judgeName?: string;
   rejectionReason?: string;
   pdfToken?: string;
+  criminalRecordUrl?: string;
+  criminalRecord?: {
+    name: string;
+    reference: string;
+    arrests: { date: string; charges: string }[];
+  };
 }
 
 interface DatabaseSchema {

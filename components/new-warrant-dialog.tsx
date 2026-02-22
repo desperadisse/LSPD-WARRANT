@@ -36,6 +36,7 @@ export function NewWarrantDialog({ open, onOpenChange, onSuccess }: NewWarrantDi
     reason: '',
     details: '',
     location: '',
+    criminalRecordUrl: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +59,7 @@ export function NewWarrantDialog({ open, onOpenChange, onSuccess }: NewWarrantDi
           reason: '',
           details: '',
           location: '',
+          criminalRecordUrl: '',
         });
       } else {
         const error = await res.text();
@@ -145,6 +147,20 @@ export function NewWarrantDialog({ open, onOpenChange, onSuccess }: NewWarrantDi
               placeholder="Décrivez les circonstances et les preuves..."
               required
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="criminalRecord" className="text-xs uppercase tracking-wider opacity-70">
+              Lien Casier Judiciaire MDT (optionnel)
+            </Label>
+            <Input
+              id="criminalRecord"
+              value={formData.criminalRecordUrl}
+              onChange={(e) => setFormData({ ...formData, criminalRecordUrl: e.target.value })}
+              className="bg-[#141414] border-[#E4E3E0]/20 text-[#E4E3E0]"
+              placeholder="https://mdt.sincity-rp.fr/public/criminal_records/..."
+            />
+            <p className="text-[10px] text-zinc-500">Le casier sera automatiquement ajouté au document PDF.</p>
           </div>
 
           <DialogFooter>

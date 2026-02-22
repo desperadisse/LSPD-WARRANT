@@ -143,6 +143,22 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
             </div>
           )}
 
+          {warrant.criminalRecord && (
+            <div>
+              <Label className="text-xs uppercase tracking-wider opacity-60">
+                Casier Judiciaire ({warrant.criminalRecord.arrests.length} arrestation{warrant.criminalRecord.arrests.length > 1 ? 's' : ''})
+              </Label>
+              <div className="bg-white p-2 rounded-md border border-[#141414]/10 text-xs max-h-32 overflow-y-auto">
+                {warrant.criminalRecord.arrests.map((a, i) => (
+                  <div key={i} className={`py-1 px-1 ${i % 2 === 0 ? 'bg-zinc-50' : ''}`}>
+                    <span className="font-mono text-zinc-500 mr-2">{a.date}</span>
+                    <span>{a.charges}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {isRejecting && (
             <div className="space-y-2">
               <Label>Motif du rejet</Label>
