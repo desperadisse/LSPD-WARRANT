@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, FileText, Search, RefreshCw, LogOut } from 'lucide-react';
 import { NewWarrantDialog } from '@/components/new-warrant-dialog';
 import { WarrantDetailDialog } from '@/components/warrant-detail-dialog';
+import { RpNameDialog } from '@/components/rp-name-dialog';
 import { cn } from '@/lib/utils';
 
 interface DashboardProps {
@@ -17,7 +18,7 @@ export function Dashboard({ user }: DashboardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isNewOpen, setIsNewOpen] = useState(false);
   const [selectedWarrant, setSelectedWarrant] = useState<Warrant | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'cancelled'>('all');
 
   const fetchWarrants = async () => {
     setIsLoading(true);
@@ -47,6 +48,8 @@ export function Dashboard({ user }: DashboardProps) {
 
   const isPolice = user.roles.includes('police');
   const isDOJ = user.roles.includes('doj');
+  const needsRpName = !user.rpName;
+  const displayName = user.rpName || user.username;
 
   return (
     <div className="min-h-screen bg-[#E4E3E0] text-[#141414] font-sans">
@@ -59,7 +62,7 @@ export function Dashboard({ user }: DashboardProps) {
           <div>
             <h1 className="font-bold text-lg tracking-tight">WARRANT SYSTEM</h1>
             <div className="text-xs opacity-60 font-mono uppercase tracking-wider">
-              {user.username} | {[isPolice && 'POLICE', isDOJ && 'DOJ'].filter(Boolean).join(' | ')} ACCESS
+              {displayName} | {[isPolice && 'POLICE', isDOJ && 'DOJ'].filter(Boolean).join(' | ')} ACCESS
             </div>
           </div>
         </div>
@@ -109,6 +112,12 @@ export function Dashboard({ user }: DashboardProps) {
               >
                 Rejetés
               </button>
+              <button 
+                onClick={() => setFilter('cancelled')}
+                className={cn("px-3 py-1 rounded-full border transition-colors", filter === 'cancelled' ? "bg-zinc-600 text-white border-zinc-600" : "border-[#141414]/20 hover:bg-[#141414]/5")}
+              >
+                Annulés
+              </button>
             </div>
           </div>
           
@@ -153,7 +162,7 @@ export function Dashboard({ user }: DashboardProps) {
                   {warrant.type === 'perquisition' ? 'PERQ' : warrant.type === 'arrestation' ? 'ARRÊT' : 'REQ'}
                 </div>
                 <div className="font-bold">{warrant.targetName}</div>
-                <div className="text-sm opacity-80">{warrant.officerName.split('#')[0]}</div>
+                <div className="text-sm opacity-80">{warrant.officerName}</div>
                 <div className="font-mono text-xs opacity-70">
                   {new Date(warrant.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </div>
@@ -162,9 +171,10 @@ export function Dashboard({ user }: DashboardProps) {
                     "px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider border",
                     warrant.status === 'pending' && "bg-yellow-100 text-yellow-800 border-yellow-200 group-hover:bg-yellow-900 group-hover:text-yellow-100 group-hover:border-yellow-700",
                     warrant.status === 'approved' && "bg-green-100 text-green-800 border-green-200 group-hover:bg-green-900 group-hover:text-green-100 group-hover:border-green-700",
-                    warrant.status === 'rejected' && "bg-red-100 text-red-800 border-red-200 group-hover:bg-red-900 group-hover:text-red-100 group-hover:border-red-700"
+                    warrant.status === 'rejected' && "bg-red-100 text-red-800 border-red-200 group-hover:bg-red-900 group-hover:text-red-100 group-hover:border-red-700",
+                    warrant.status === 'cancelled' && "bg-zinc-100 text-zinc-600 border-zinc-200 group-hover:bg-zinc-800 group-hover:text-zinc-100 group-hover:border-zinc-600"
                   )}>
-                    {warrant.status === 'pending' ? 'EN ATTENTE' : warrant.status === 'approved' ? 'VALIDÉ' : 'REJETÉ'}
+                    {warrant.status === 'pending' ? 'EN ATTENTE' : warrant.status === 'approved' ? 'VALIDÉ' : warrant.status === 'cancelled' ? 'ANNULÉ' : 'REJETÉ'}
                   </span>
                 </div>
                 <div>
@@ -193,6 +203,8 @@ export function Dashboard({ user }: DashboardProps) {
           user={user}
         />
       )}
+
+      <RpNameDialog open={needsRpName} />
     </div>
   );
 }

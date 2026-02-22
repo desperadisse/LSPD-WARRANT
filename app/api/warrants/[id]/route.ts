@@ -43,14 +43,19 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (status === 'approved') {
       warrant.status = 'approved';
       warrant.judgeId = session.id as string;
-      warrant.judgeName = `${session.username}#${session.discriminator}`;
+      warrant.judgeName = (session.rpName as string) || `${session.username}`;
       warrant.updatedAt = new Date().toISOString();
       warrant.pdfToken = uuidv4();
     } else if (status === 'rejected') {
       warrant.status = 'rejected';
       warrant.judgeId = session.id as string;
-      warrant.judgeName = `${session.username}#${session.discriminator}`;
+      warrant.judgeName = (session.rpName as string) || `${session.username}`;
       warrant.rejectionReason = rejectionReason;
+      warrant.updatedAt = new Date().toISOString();
+    } else if (status === 'cancelled') {
+      warrant.status = 'cancelled';
+      warrant.judgeId = session.id as string;
+      warrant.judgeName = (session.rpName as string) || `${session.username}`;
       warrant.updatedAt = new Date().toISOString();
     } else {
       return new NextResponse('Invalid status', { status: 400 });

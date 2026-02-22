@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
+import { getRpUser } from '@/lib/db';
 
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
@@ -90,12 +91,15 @@ export async function GET(request: NextRequest) {
       process.env.JWT_SECRET || 'default-secret-key-change-me'
     );
     
+    const rpUser = getRpUser(userData.id);
+
     const token = await new SignJWT({
       id: userData.id,
       username: userData.username,
       discriminator: userData.discriminator,
       avatar: userData.avatar,
       roles,
+      rpName: rpUser?.rpName || null,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()

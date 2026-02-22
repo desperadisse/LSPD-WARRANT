@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       officerId: session.id as string,
-      officerName: `${session.username}#${session.discriminator}`,
+      officerName: (session.rpName as string) || `${session.username}`,
       targetName,
       reason,
       details,

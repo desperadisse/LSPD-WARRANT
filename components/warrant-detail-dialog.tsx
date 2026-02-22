@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Download, Check, X, Link, Copy } from 'lucide-react';
+import { Loader2, Download, Check, X, Copy, Ban } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
@@ -31,7 +31,7 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
 
   const isDOJ = user.roles.includes('doj');
 
-  const handleStatusUpdate = async (status: 'approved' | 'rejected') => {
+  const handleStatusUpdate = async (status: 'approved' | 'rejected' | 'cancelled') => {
     if (status === 'rejected' && !rejectionReason) {
       setIsRejecting(true);
       return;
@@ -75,7 +75,7 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-xs uppercase tracking-wider opacity-60">Officier</Label>
-              <div className="font-bold">{warrant.officerName.split('#')[0]}</div>
+              <div className="font-bold">{warrant.officerName}</div>
             </div>
             <div>
               <Label className="text-xs uppercase tracking-wider opacity-60">Cible</Label>
@@ -106,13 +106,20 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
             <div className="bg-red-100 p-3 rounded-md border border-red-200 text-red-900">
               <Label className="text-xs uppercase tracking-wider opacity-60 text-red-800">Motif du rejet</Label>
               <div className="text-sm">{warrant.rejectionReason}</div>
-              <div className="text-xs mt-1 opacity-70">Par: {warrant.judgeName?.split('#')[0]}</div>
+              <div className="text-xs mt-1 opacity-70">Par: {warrant.judgeName}</div>
             </div>
           )}
 
           {warrant.status === 'approved' && (
             <div className="bg-green-100 p-3 rounded-md border border-green-200 text-green-900">
-              <div className="text-sm font-bold">Validé par: {warrant.judgeName?.split('#')[0]}</div>
+              <div className="text-sm font-bold">Validé par: {warrant.judgeName}</div>
+              <div className="text-xs opacity-70">Le {new Date(warrant.updatedAt).toLocaleDateString()}</div>
+            </div>
+          )}
+
+          {warrant.status === 'cancelled' && (
+            <div className="bg-zinc-100 p-3 rounded-md border border-zinc-200 text-zinc-700">
+              <div className="text-sm font-bold">Annulé par: {warrant.judgeName}</div>
               <div className="text-xs opacity-70">Le {new Date(warrant.updatedAt).toLocaleDateString()}</div>
             </div>
           )}
@@ -177,6 +184,17 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
                   Valider
                 </Button>
               </>
+            )}
+            {isDOJ && (warrant.status === 'pending' || warrant.status === 'approved') && !isRejecting && (
+              <Button
+                variant="outline"
+                onClick={() => handleStatusUpdate('cancelled')}
+                disabled={isLoading}
+                className="border-zinc-400 text-zinc-600 hover:bg-zinc-100"
+              >
+                <Ban className="w-4 h-4 mr-2" />
+                Annuler
+              </Button>
             )}
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Fermer</Button>
           </div>

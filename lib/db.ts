@@ -12,10 +12,15 @@ export interface User {
   roles: string[]; // 'police', 'doj', or both
 }
 
+export interface RpUser {
+  discordId: string;
+  rpName: string;
+}
+
 export interface Warrant {
   id: string;
   type: 'perquisition' | 'arrestation' | 'requisition';
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   createdAt: string;
   updatedAt: string;
   officerId: string;
@@ -32,6 +37,7 @@ export interface Warrant {
 
 interface DatabaseSchema {
   warrants: Warrant[];
+  users: RpUser[];
 }
 
 // Ensure data directory exists
@@ -41,36 +47,53 @@ if (!fs.existsSync(DB_PATH)) {
 
 // Initialize DB file if not exists
 if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify({ warrants: [] }, null, 2));
+  fs.writeFileSync(DB_FILE, JSON.stringify({ warrants: [], users: [] }, null, 2));
+}
+
+function getDb(): DatabaseSchema {
+  try {
+    const data = fs.readFileSync(DB_FILE, 'utf-8');
+    const db = JSON.parse(data) as DatabaseSchema;
+    if (!db.users) db.users = [];
+    return db;
+  } catch {
+    return { warrants: [], users: [] };
+  }
+}
+
+function saveDb(db: DatabaseSchema): void {
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+}
+
+export function getRpUser(discordId: string): RpUser | undefined {
+  const db = getDb();
+  return db.users.find((u) => u.discordId === discordId);
+}
+
+export function saveRpUser(user: RpUser): void {
+  const db = getDb();
+  const index = db.users.findIndex((u) => u.discordId === user.discordId);
+  if (index >= 0) {
+    db.users[index] = user;
+  } else {
+    db.users.push(user);
+  }
+  saveDb(db);
 }
 
 export function getWarrants(): Warrant[] {
-  try {
-    const data = fs.readFileSync(DB_FILE, 'utf-8');
-    const db = JSON.parse(data) as DatabaseSchema;
-    return db.warrants;
-  } catch (error) {
-    console.error('Error reading DB:', error);
-    return [];
-  }
+  return getDb().warrants;
 }
 
 export function saveWarrant(warrant: Warrant): void {
-  try {
-    const data = fs.readFileSync(DB_FILE, 'utf-8');
-    const db = JSON.parse(data) as DatabaseSchema;
-    const index = db.warrants.findIndex((w) => w.id === warrant.id);
-    
-    if (index >= 0) {
-      db.warrants[index] = warrant;
-    } else {
-      db.warrants.push(warrant);
-    }
-    
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
-  } catch (error) {
-    console.error('Error saving warrant:', error);
+  const db = getDb();
+  const index = db.warrants.findIndex((w) => w.id === warrant.id);
+  if (index >= 0) {
+    db.warrants[index] = warrant;
+  } else {
+    db.warrants.push(warrant);
   }
+  saveDb(db);
 }
 
 export function getWarrantById(id: string): Warrant | undefined {
