@@ -4,6 +4,24 @@ export interface CriminalRecord {
   arrests: { date: string; charges: string }[];
 }
 
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&eacute;/g, 'é')
+    .replace(/&egrave;/g, 'è')
+    .replace(/&agrave;/g, 'à')
+    .replace(/&ccedil;/g, 'ç')
+    .replace(/&nbsp;/g, ' ');
+}
+
 export async function fetchCriminalRecord(url: string): Promise<CriminalRecord | null> {
   const match = url.match(/mdt\.sincity-rp\.fr\/public\/criminal_records\/(\d+)/);
   if (!match) return null;
@@ -18,7 +36,7 @@ export async function fetchCriminalRecord(url: string): Promise<CriminalRecord |
     const html = await res.text();
 
     const nameMatch = html.match(/Casier Judiciaire de\s+([^<]+)/);
-    const name = nameMatch ? nameMatch[1].trim() : 'Inconnu';
+    const name = nameMatch ? decodeHtmlEntities(nameMatch[1].trim()) : 'Inconnu';
 
     const refMatch = html.match(/[Rr][ée]f[ée]rence\s*:\s*(\d+)/);
     const reference = refMatch ? refMatch[1] : match[1];
@@ -30,8 +48,8 @@ export async function fetchCriminalRecord(url: string): Promise<CriminalRecord |
     let isHeader = true;
 
     while ((rowMatch = tableRegex.exec(html)) !== null) {
-      const col1 = rowMatch[1].replace(/<[^>]+>/g, '').trim();
-      const col2 = rowMatch[2].replace(/<[^>]+>/g, '').trim();
+      const col1 = decodeHtmlEntities(rowMatch[1].replace(/<[^>]+>/g, '').trim());
+      const col2 = decodeHtmlEntities(rowMatch[2].replace(/<[^>]+>/g, '').trim());
 
       if (isHeader && (col1.toLowerCase().includes('date') || col1 === name)) {
         isHeader = false;
