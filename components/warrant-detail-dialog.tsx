@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Download, Check, X, Copy, Ban } from 'lucide-react';
+import { Loader2, Download, Check, X, Copy, Ban, Trash2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
@@ -30,6 +30,25 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
   const [copied, setCopied] = useState(false);
 
   const isDOJ = user.roles.includes('doj');
+
+  const handleDelete = async () => {
+    if (!confirm('Supprimer définitivement ce dossier ?')) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/warrants/${warrant.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        onUpdate();
+        onOpenChange(false);
+      } else {
+        const error = await res.text();
+        alert(`Erreur: ${error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting warrant:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleStatusUpdate = async (status: 'approved' | 'rejected' | 'cancelled') => {
     if (status === 'rejected' && !rejectionReason) {
@@ -194,6 +213,17 @@ export function WarrantDetailDialog({ warrant, open, onOpenChange, onUpdate, use
               >
                 <Ban className="w-4 h-4 mr-2" />
                 Annuler
+              </Button>
+            )}
+            {isDOJ && (
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isLoading}
+                size="sm"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Supprimer
               </Button>
             )}
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Fermer</Button>

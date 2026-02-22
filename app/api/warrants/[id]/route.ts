@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWarrantById, saveWarrant, Warrant } from '@/lib/db';
+import { getWarrantById, saveWarrant, deleteWarrant, Warrant } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -67,4 +67,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     console.error('Error updating warrant:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const session = await getSession();
+  if (!session) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
+  const userRoles = (session.roles as string[]) || [];
+  if (!userRoles.includes('doj')) {
+    return new NextResponse('Forbidden: Only DOJ can delete warrants', { status: 403 });
+  }
+
+  const deleted = deleteWarrant(id);
+  if (!deleted) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
+  return NextResponse.json({ success: true });
 }

@@ -100,3 +100,12 @@ export function getWarrantById(id: string): Warrant | undefined {
   const warrants = getWarrants();
   return warrants.find((w) => w.id === id);
 }
+
+export function deleteWarrant(id: string): boolean {
+  const db = getDb();
+  const index = db.warrants.findIndex((w) => w.id === id);
+  if (index < 0) return false;
+  db.warrants.splice(index, 1);
+  saveDb(db);
+  return true;
+}
